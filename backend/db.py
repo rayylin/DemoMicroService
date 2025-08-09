@@ -1,10 +1,10 @@
-import urllib.parse
+# backend/db.py
+import os, urllib.parse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-import os
 
-load_dotenv()  # load variables from .env
+load_dotenv()
 
 DRIVER = os.getenv("SQLSERVER_DRIVER")
 SERVER = os.getenv("SQLSERVER_SERVER")
@@ -13,7 +13,6 @@ TRUSTED_CONNECTION = os.getenv("SQLSERVER_TRUSTED_CONNECTION", "yes")
 TRUST_SERVER_CERTIFICATE = os.getenv("SQLSERVER_TRUST_SERVER_CERTIFICATE", "yes")
 MARS = os.getenv("SQLSERVER_MARS", "True")
 
-# Build ODBC connection string
 odbc_str = (
     f"DRIVER={{{DRIVER}}};"
     f"SERVER={SERVER};"
@@ -23,7 +22,6 @@ odbc_str = (
     f"MultipleActiveResultSets={MARS};"
 )
 
-# URL encode and wrap for SQLAlchemy
 connect_url = "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(odbc_str)
 
 engine = create_engine(connect_url, pool_pre_ping=True)
