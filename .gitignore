@@ -1,6 +1,8 @@
 # files to ignore
 config.py
 
+backend/.env
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
