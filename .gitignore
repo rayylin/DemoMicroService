@@ -5,6 +5,7 @@ backend/.env
 backend/test.py
 
 frontend/.env
+frontend/test.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
