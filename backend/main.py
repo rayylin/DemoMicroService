@@ -54,3 +54,41 @@ def healthz():
     with engine.connect() as conn:
         conn.execute(text("SELECT 1"))
     return {"status": "ok"}
+
+
+# main.py (add near the top with other imports)
+from typing import Any, Optional
+import requests
+from fastapi import FastAPI, HTTPException
+
+# ...
+
+def getHkCmpInfo(cmp_name: str) -> Optional[dict[str, Any]]:
+    url = "https://data.cr.gov.hk/cr/api/api/v1/api_builder/json/local/search"
+    params = {
+        "query[0][key1]": "Comp_name",
+        "query[0][key2]": "begins_with",
+        "query[0][key3]": cmp_name,
+    }
+    try:
+        r = requests.get(url, params=params, timeout=10)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        # 502 Bad Gateway makes sense for upstream issues
+        raise HTTPException(status_code=502, detail=f"Upstream error: {e}")
+
+    data = r.json()
+    if data and isinstance(data, list):
+        dic = data[0]
+        dic["CompanySource"] = "TW"  # keep your original behavior
+        return dic
+    return None
+
+# Add a new GET endpoint (query param: ?name=...)
+@app.get("/hk/company", response_model=dict[str, Any] | None)
+def hk_company(name: str):
+    info = getHkCmpInfo(name)
+    if info is None:
+        # 404 if nothing found
+        raise HTTPException(status_code=404, detail="Company not found")
+    return info
